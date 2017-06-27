@@ -1,1 +1,3 @@
-this is how github works!
+This is how it works.
+
+ohhh noo. i should fix some mistakes before push.
