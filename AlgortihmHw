@@ -8,32 +8,203 @@
 
 using namespace std;
 
-void Basiyoruz(vector < vector<int > > v)
+int ifexists(vector < vector<int > > *, pair <int,int> * );
+
+int main(int argc, char** argv)
 {
-	cout << "Basiyoruz\n";
-	for (int i = 0; i< v.size();i++)
+	if (argc < 2)
 	{
-		for (int j=0;j<v[i].size();j++)
-		cout << v[i][j] << " ";
-	cout << endl;
+		std::cerr << "Error" << std::endl;
+        	return 1;
 	}
+	char* f_name = argv[1];		
+	fstream file;	
+	file.open(f_name);
+	int birincininstatesayisi;file >> birincininstatesayisi;
+	int birincininsembolsayisi;file >> birincininsembolsayisi;
+	int birinciinitialstateler;file >> birinciinitialstateler;
+	vector <int> finalstateler;
+	int finalstateler_1;
+	string dummy;
+	std::getline (file,dummy); 
+	std::getline (file,dummy);
+	std::stringstream ss;
+	std::string input = dummy;ss << input;
+	int t;
+	std::string tmp;
+	while(std::getline(ss, tmp,' ')) {
+		if(std::stringstream(tmp)>>t)
+		{
+			finalstateler.push_back(t);
+		}
+	}
+	vector<int> vc; 
+	vector<vector<int> > statelerim1;
+	int states_1;
+	for (int i = 0; i < birincininstatesayisi; ++i)
+	{
+		for (int j = 0; j < birincininsembolsayisi; ++j){
+				file >> states_1;
+				vc.push_back(states_1); 
+		}
+		statelerim1.push_back(vc);
+		vc.clear();
+	}
+
+	file.close();f_name = argv[2];	file.open(f_name);
+	int ikincininstatesayisi;file >> ikincininstatesayisi;
+	int ikincininsembolsayisi;file >> ikincininsembolsayisi;
+	int vc2;file >> vc2;
+	vector <int> finalstateler2;
+	int finalstateler_2;
+	string dummy2;
+	std::getline (file,dummy2); 
+	std::getline (file,dummy2);
+	std::stringstream sss;
+	std::string input2 = dummy2;	
+	sss << input2;
+	int t2;
+	std::string tmp2;
+	while(std::getline(sss, tmp2,' ')) {
+		if(std::stringstream(tmp2)>>t2)
+		{
+			finalstateler.push_back(t2);
+		}
+	}
+	vector<int> arcsInOrder_2; 
+	vector<vector<int> > StatesVector_2;
+	int states_2;
+	for (int i = 0; i < ikincininstatesayisi; ++i)
+	{
+		for (int j = 0; j < ikincininsembolsayisi; ++j){
+				file >> states_2;
+				arcsInOrder_2.push_back(states_2); 
+		}
+		StatesVector_2.push_back(arcsInOrder_2);
+		arcsInOrder_2.clear();
+	}
+	if(birincininsembolsayisi!=ikincininsembolsayisi) {cout << "notequal" << endl; return 0;}
 	
-		
-			
+	vector < vector<int > > sets;
+	int numberOfAllStates;
+	numberOfAllStates = birincininstatesayisi+ikincininstatesayisi;
+	sets.resize(numberOfAllStates);
+	for (int i = 0; i < numberOfAllStates;i++)
+	{
+		sets[i].push_back(i);
+	}
+	stack<pair<int, int> > stagim;
+	pair<int, int> initialStates;
+	initialStates.first = birinciinitialstateler;
+	initialStates.second = vc2 + birincininstatesayisi;
+	
+	sets[birinciinitialstateler].push_back(initialStates.second);
+	sets[initialStates.second][0]=-1;
+	stagim.push(initialStates);
+	while(true)
+	{
+		if (stagim.empty()) break;
+		pair<int, int> cikan = stagim.top();
+		stagim.pop();
+		pair<int, int> sonrakiCift;
+		for (int i = 0; i< birincininsembolsayisi;i++)
+		{
+			sonrakiCift = make_pair(statelerim1[cikan.first][i],StatesVector_2[cikan.second- birincininstatesayisi][i]+birincininstatesayisi);
+			if (!ifexists(&sets,&sonrakiCift)) {stagim.push(sonrakiCift);
+			}
+		}
+	}
+	bool f,f2,f3;
+	for (int i = 0; i< sets.size();i++)
+	{
+		f=f2=f3=0;
+		for (int j=0;j<sets[i].size();j++)
+		{
+			if (f && f2) 
+			{
+				cout << "notequal" << endl; 
+				return 0;
+			}
+			f3 = 0;
+			for (int k = 0;k<finalstateler.size();k++)
+			{
+				if (sets[i][j] == finalstateler[k])
+					f3=true;
+			}
+			if (f3==true) f = true;
+			if (f3==false) f2=true;
+		}
+	}
+	for (int i = 0; i< sets.size();i++)
+	{
+		f=f2=f3=0;
+		for (int j=0;j<sets[i].size();j++)
+		{
+			if (f && f2) 
+			{
+			}
+			f3 = 0;
+			for (int k = 0;k<finalstateler.size();k++)
+			{
+				if (sets[i][j] == finalstateler[k])
+					f3=true;
+			}
+			if (f3==true) f = true;
+			if (f3==false) f2=true;
+		}
+	}
+	for (int i = 0; i< sets.size();i++)
+	{
+		f=f2=f3=0;
+		for (int j=0;j<sets[i].size();j++)
+		{
+			if (f && f2) 
+			{
+			}
+			f3 = 0;
+			for (int k = 0;k<finalstateler.size();k++)
+			{
+				if (sets[i][j] == finalstateler[k])
+					f3=true;
+			}
+			if (f3==true) f = true;
+			if (f3==false) f2=true;
+		}
+	}
+	for (int i = 0; i< sets.size();i++)
+	{
+		f=f2=f3=0;
+		for (int j=0;j<sets[i].size();j++)
+		{
+			if (f && f2) 
+			{
+			}
+			f3 = 0;
+			for (int k = 0;k<finalstateler.size();k++)
+			{
+				if (sets[i][j] == finalstateler[k])
+					f3=true;
+			}
+			if (f3==true) f = true;
+			if (f3==false) f2=true;
+		}
+	}
+	cout << "equal" << endl;
+	return 0;
 }
 
-bool tekmiciftmi(vector < vector<int > > *v, pair <int,int> *p )
+int ifexists(vector < vector<int > > *vectorum, pair <int,int> *pairim )
 {
 	int a,b,c,d;
-	for (int i = 0; i< v->size();i++)
+	for (int i = 0; i< vectorum->size();i++)
 	{
-		for (int j=0;j<(*v)[i].size();j++)
+		for (int j=0;j<(*vectorum)[i].size();j++)
 		{
-			if((*v)[i][j] == p->first)
+			if((*vectorum)[i][j] == pairim->first)
 			{
 				a=i;c=j;
 			}
-			if((*v)[i][j] == p->second) 
+			if((*vectorum)[i][j] == pairim->second) 
 			{
 				b=i;d=j;
 			}			
@@ -42,245 +213,33 @@ bool tekmiciftmi(vector < vector<int > > *v, pair <int,int> *p )
 	}
 	if (a==b) {return true;}
 	
-	if((*v)[a].size() == 1 && (*v)[b].size() == 1)
+	if((*vectorum)[a].size() == 1 && (*vectorum)[b].size() == 1)
 	{
-		vector<int> temp;
-		temp.push_back((*p).first);
-		temp.push_back((*p).second);
-		(*v)[a][0] = -1;
-		(*v)[b][0] = -1;
-		(*v).push_back(temp);
+		vector<int> dummy;
+		dummy.push_back((*pairim).first);
+		dummy.push_back((*pairim).second);
+		(*vectorum)[a][0] = -1;
+		(*vectorum)[b][0] = -1;
+		(*vectorum).push_back(dummy);
 	}
 	else
 	{
-		if((*v)[a].size() != 1 && (*v)[b].size() == 1)
+		if((*vectorum)[a].size() != 1 && (*vectorum)[b].size() == 1)
 		{
-			(*v)[a].push_back((*v)[b][0]);
-			(*v)[b][0] = -1;
+			(*vectorum)[a].push_back((*vectorum)[b][0]);
+			(*vectorum)[b][0] = -1;
 		}
 		else 
 		{
-			if ((*v)[a].size() == 1 && (*v)[b].size() != 1)
+			if ((*vectorum)[a].size() == 1 && (*vectorum)[b].size() != 1)
 			{
-				(*v)[b].push_back((*v)[a][0]);
-				(*v)[a][0] = -1;
+				(*vectorum)[b].push_back((*vectorum)[a][0]);
+				(*vectorum)[a][0] = -1;
 			}
 			else
 			{
-				//cout << "burdan\n";
-				(*v)[b].push_back((*v)[a][c]);
-				(*v)[a].push_back((*v)[b][d]);
-			}
-		}
-	}
-	
-	return false;
-		
-}
-
-
-int main(int argc, char** argv)
-{
-	if (argc < 2)
-	{
-		std::cerr << "Please provide scene and camera files" << std::endl;
-        return 1;
-	}
-/*----------------------------------First File--------------------------------*/
-	char* f_name = argv[1];		//filename
-	fstream file;	
-	file.open(f_name);
-	// cout << "---------------------FIRST FILE-----------------------" << endl;
-	int numberOfStates_1;
-	file >> numberOfStates_1;
-
-	// cout << "numberOfStates_1: " << numberOfStates_1 << endl;
-	// cout << endl;
-
-	int numberOfSymbols_1;
-	file >> numberOfSymbols_1;
-
-	// cout << "numberOfSymbols_1: " << numberOfSymbols_1 << endl;
-	// cout << endl;
-
-	int initialState_1;
-	file >> initialState_1;
-
-	// cout << "initialState_1: " << initialState_1 << endl;
-	// cout << endl;
-	// cout << "--------------starts here ------------" << endl;
-		
-	vector <int> finalStates;
-	int finalStates_1;
-	string temp;
-	std::getline (file,temp); 
-	std::getline (file,temp);
-	std::stringstream ss;
-	std::string input = temp;	
-	ss << input;
-	int found;
-	std::string tmp;
-
-	while(std::getline(ss, tmp,' ')) {
-		if(std::stringstream(tmp)>>found)
-		{
-			// cout << found <<" ";
-			finalStates.push_back(found);
-		}
-	}
-	// cout << endl;
-	// cout << "--------------ends here ------------" << endl;
-
-	vector<int> arcsInOrder_1; 
-	vector<vector<int> > StatesVector_1;
-	int states_1;
-	for (int i = 0; i < numberOfStates_1; ++i)
-	{
-		for (int j = 0; j < numberOfSymbols_1; ++j){
-				file >> states_1;
-				arcsInOrder_1.push_back(states_1); 
-
-				// cout << "states_1 " << states_1 << endl;
-				// cout << endl;
-
-		}
-		StatesVector_1.push_back(arcsInOrder_1);
-		arcsInOrder_1.clear();
-	}
-
-	file.close();
-
-
-
-/*----------------------------------Second File--------------------------------*/
-	f_name = argv[2];	//filename
-	file.open(f_name);
-	// cout << "---------------------SECOND FILE-----------------------" << endl;
-	int numberOfStates_2;
-	file >> numberOfStates_2;
-
-	// cout << "numberOfStates_2: " << numberOfStates_2 << endl;
-	// cout << endl;
-
-	int numberOfSymbols_2;
-	file >> numberOfSymbols_2;
-
-	// cout << "numberOfSymbols_2: " << numberOfSymbols_2 << endl;
-	// cout << endl;
-
-	int initialState_2;
-	file >> initialState_2;
-
-	// cout << "initialState_2: " << initialState_2 << endl;
-	// cout << endl;
-	
-	// cout << "--------------starts here ------------" << endl;
-	vector <int> finalStates2;
-	int finalStates_2;
-	string temp2;
-	std::getline (file,temp2); 
-	std::getline (file,temp2);
-	std::stringstream sss;
-	std::string input2 = temp2;	
-	sss << input2;
-	int found2;
-	std::string tmp2;
-
-	while(std::getline(sss, tmp2,' ')) {
-		if(std::stringstream(tmp2)>>found2)
-		{
-			// cout << found2 <<" ";
-			finalStates.push_back(found2);
-		}
-	}
-
-
-	
-	vector<int> arcsInOrder_2; 
-	vector<vector<int> > StatesVector_2;
-	int states_2;
-	for (int i = 0; i < numberOfStates_2; ++i)
-	{
-		for (int j = 0; j < numberOfSymbols_2; ++j){
-				file >> states_2;
-				arcsInOrder_2.push_back(states_2); 
-		}
-		StatesVector_2.push_back(arcsInOrder_2);
-		arcsInOrder_2.clear();
-
-	}
-	
-	if(numberOfSymbols_1!=numberOfSymbols_2) {cout << "notequal" << endl; return 0;}
-	
-	vector < vector<int > > sets;
-	int numberOfAllStates;
-	numberOfAllStates = numberOfStates_1+numberOfStates_2;
-	sets.resize(numberOfAllStates);
-	for (int i = 0; i < numberOfAllStates;i++)
-	{
-		sets[i].push_back(i);
-		//cout << "Sets " << i << " "<<sets[i][0]  << endl;
-	}
-	stack<pair<int, int> > myStack;
-	pair<int, int> initialStates;
-	initialStates.first = initialState_1;
-	initialStates.second = initialState_2 + numberOfStates_1;
-	
-	sets[initialState_1].push_back(initialStates.second);
-	sets[initialStates.second][0]=-1;
-	// cout << sets[initialStates.second][0] << endl;
-	myStack.push(initialStates);
-	//Basiyoruz(sets);
-	
-	//cout << "initialStates.first:" << initialStates.first <<endl;
-	//cout << "initialStates.second:" << initialStates.second <<endl;
-
-	
-	while(!myStack.empty())
-	{
-		pair<int, int> popPed = myStack.top();
-		//cout << "kkkkk" << popPed.first << " " << popPed.second << endl;
-		myStack.pop();
-		pair<int, int> sonrakiCift;
-		for (int i = 0; i< numberOfSymbols_1;i++)
-		{
-			//cout << i << "naber la " << StatesVector_1[popPed.first][i] <<endl;
-			sonrakiCift = make_pair(StatesVector_1[popPed.first][i],StatesVector_2[popPed.second- numberOfStates_1][i]+numberOfStates_1);
-			//cout << "önce" << sonrakiCift.first << " " << sonrakiCift.second << endl;
-			if (!tekmiciftmi(&sets,&sonrakiCift)) {myStack.push(sonrakiCift);
-			//cout << "sonra " << sonrakiCift.first << " " << sonrakiCift.second << endl;
-			//Basiyoruz(sets);
-			}
-			
-		}
-		
-	}
-	bool flag,flag2,flag3;
-	//cout << "Basiyoruz\n";
-	for (int i = 0; i< sets.size();i++)
-	{
-		flag=flag2=flag3=0;
-		for (int j=0;j<sets[i].size();j++)
-		{
-			if (flag && flag2) 
-			{
-				cout << "notequal" << endl; 
-				return 0;
-			}
-			flag3 = 0;
-			for (int k = 0;k<finalStates.size();k++)
-			{
-				if (sets[i][j] == finalStates[k])
-					flag3=true;
-			}
-			if (flag3==true) flag = true;
-			if (flag3==false) flag2=true;
-			
-		}
-			
-	}
-	cout << "equal" << endl;
-	
-	return 0;
-
+				(*vectorum)[b].push_back((*vectorum)[a][c]);
+				(*vectorum)[a].push_back((*vectorum)[b][d]);
+			}}}
+	return false;	
 }
