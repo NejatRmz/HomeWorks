@@ -1,0 +1,668 @@
+package ceng.ceng351.stackoverflowdb;
+
+import java.sql.DriverManager;
+import java.sql.PreparedStatement;
+import java.sql.SQLException;
+import java.sql.Connection;
+import java.sql.Statement;
+import java.sql.ResultSet;
+import java.util.ArrayList;
+import java.util.List;
+
+import ceng.ceng351.stackoverflowdb.QueryResult.NameUsernameDateRatingResult;
+import ceng.ceng351.stackoverflowdb.QueryResult.UseridUsernameLastlogindateResult;
+import ceng.ceng351.stackoverflowdb.QueryResult.UseridUsernameRegistrationdateWeeklyreputationResult;
+import ceng.ceng351.stackoverflowdb.QueryResult.UsernameDateRatingResult;
+import ceng.ceng351.stackoverflowdb.QueryResult.UsernameMessageRatingAlltimereputationResult;
+import ceng.ceng351.stackoverflowdb.QueryResult.UsernameMessageRatingResult;
+
+public class STACKOVERFLOWDB implements ISTACKOVERFLOWDB{
+	
+    private static String user = "e1749662";  
+    private static String password = "f9d4a7";
+    private static String host = "144.122.71.165";
+    private static String database = "db1749662";
+    private static int port = 3306;
+     
+     
+    private static Connection con;
+    
+	
+	STACKOVERFLOWDB(){}
+	@Override
+	public void initialize() {
+        // TODO Auto-generated method stub
+		String url = "jdbc:mysql://" + this.host + ":" + this.port + "/" + this.database;
+		
+		try {
+		    Class.forName("com.mysql.jdbc.Driver");
+		    this.con =  DriverManager.getConnection(url, this.user, this.password);
+		    
+		    
+		} catch (SQLException e) {
+		    e.printStackTrace();
+		} catch (ClassNotFoundException e) {
+		        e.printStackTrace();
+		}
+	}
+
+	@Override
+	public int createTables() {
+		int result;
+		int numberofTablesInserted = 0;
+		
+		
+		
+	
+		
+		String queryCreateUserTable = "create table user (" + 
+									   "userID char(10) not null," + 
+									   "username char(30)," + 
+									   "registrationDate date," +
+									   "lastLoginDate date," +
+									   "primary key (userID))";
+		
+
+		
+		try {
+			Statement statement = this.con.createStatement();
+			
+			result = statement.executeUpdate(queryCreateUserTable);
+			System.out.println(result);
+			numberofTablesInserted++;
+			
+			statement.close();
+			
+		} catch (SQLException e) {
+			// TODO 
+		// TODO Auto-generated method stub
+		}
+		
+		
+		String queryCreateArticleTable = "create table article (" + 
+						   "articleID char(10) not null," + 
+						   "userID char(10)," + 
+						   "name char(80)," +
+						   "description char(130)," +
+						   "date date,"+
+						   "rating int,"+
+						   "primary key (articleID),"+
+						   "FOREIGN KEY (userID) references user(userID) on delete cascade on update cascade)";
+		
+		
+		
+		try {
+		Statement statement = this.con.createStatement();
+		
+		result = statement.executeUpdate(queryCreateArticleTable);
+		System.out.println(result);
+		numberofTablesInserted++;
+		
+		statement.close();
+		
+		} catch (SQLException e) {
+		// TODO 
+		// TODO Auto-generated method stub
+		}
+		
+		
+		String queryCreateCommentTable = "create table comment (" + 
+					"commentID char(10) not null," + 
+					"articleID char(10)," + 
+					"userID char(10)," +
+					"message char(130)," +
+					"date date," +
+					"rating int," +
+					"primary key (commentID)," +
+					"FOREIGN KEY (articleID) references article(articleID)on delete cascade on update cascade, "+
+					"FOREIGN KEY (userID) references user(userID)on delete cascade on update cascade) ";
+		
+		try {
+		Statement statement = this.con.createStatement();
+		
+		result = statement.executeUpdate(queryCreateCommentTable);
+		System.out.println(result);
+		numberofTablesInserted++;
+		statement.close();
+		
+		} catch (SQLException e) {
+		// TODO 
+		// TODO Auto-generated method stub
+		}
+
+		//reputation(reputationID:char(10), userID:char(10), weeklyReputation:int, monthlyReputation:int, yearlyReputation:int,
+				//alltimeReputation:int)
+			String queryCreateReputationTable = "create table reputation (" + 
+			   "reputationID char(10) not null," + 
+			   "userID char(10)," + 
+			   "weeklyReputation int," +
+			   "monthlyReputation int," +
+			   "yearlyReputation int," + 
+			   "alltimeReputation int,"+
+			   "primary key (reputationID),"+ 
+			   "FOREIGN KEY (userID) references user(userID)on delete cascade on update cascade) ";
+	
+	
+	
+			try {
+			Statement statement = this.con.createStatement();
+			
+			result = statement.executeUpdate(queryCreateReputationTable);
+			System.out.println(result);
+			numberofTablesInserted++;
+			
+			statement.close();
+			
+			} catch (SQLException e) {
+			// TODO 
+			// TODO Auto-generated method stub
+			}
+	
+		
+		
+		return numberofTablesInserted;
+	}
+
+	@Override
+	public int dropTables() {
+		// TODO Auto-generated method stub
+		int result;
+		int numberofTablesDropped = 0;
+		
+		
+
+		String queryDropReputationTable = "drop table if exists Reputation";
+
+		try {
+			Statement statement = this.con.createStatement();
+			
+			result = statement.executeUpdate(queryDropReputationTable);
+			numberofTablesDropped++;
+			System.out.println(result);
+			
+			statement.close();
+			
+		} catch (SQLException e) {
+			// TODO 
+		}
+
+	String queryDropCommentTable = "drop table if exists Comment";
+
+	try {
+		Statement statement = this.con.createStatement();
+		
+		result = statement.executeUpdate(queryDropCommentTable);
+		numberofTablesDropped++;
+		System.out.println(result);
+		
+		statement.close();
+		
+	} catch (SQLException e) {
+		// TODO 
+	}
+
+	
+	
+
+	
+String queryDropArticleTable = "drop table if exists Article";
+
+try {
+	Statement statement = this.con.createStatement();
+	
+	result = statement.executeUpdate(queryDropArticleTable);
+	numberofTablesDropped++;
+	System.out.println(result);
+	
+	statement.close();
+	
+} catch (SQLException e) {
+	// TODO 
+}
+String queryDropUserTable = "drop table if exists User";
+
+try {
+	Statement statement = this.con.createStatement();
+	
+	result = statement.executeUpdate(queryDropUserTable);
+	numberofTablesDropped++;
+	System.out.println(result);
+	
+	statement.close();
+	
+} catch (SQLException e) {
+	// TODO 
+}
+
+
+	
+	return numberofTablesDropped;
+}
+
+
+	@Override
+	public int insertUser(User[] users) {
+		
+		int result = 0;
+		int num=0;
+		for(int i=0;i<users.length;i++)
+		{
+			//user(userID:char(10), username:char(30), registrationDate:date, lastLoginDate:date),
+			String query = "insert into User values ('" + 
+					users[i].getuserID()+ "','" + 
+					users[i].getusername() + "','" + 
+					users[i].getregistrationDate() + "','" + 
+					users[i].getlastLoginDate() + "')";
+			
+			try {
+				
+				Statement st = this.con.createStatement();
+				result = st.executeUpdate(query);
+				System.out.println(result);
+				num++;
+				//Close
+				st.close();
+				
+			} catch (SQLException e) {
+				e.printStackTrace();
+			}
+		}
+		return num;
+	}
+
+	@Override
+	public int insertArticle(Article[] articles) {
+		int result = 0;
+		int num=0;
+		for(int i=0;i<articles.length;i++)
+		{
+		//article(articleID:char(10), userID:char(10), name:char(80), description:char(130), date:date, rating:int),
+			String query = "insert into Article values ('" + 
+					articles[i].getarticleID()+ "','" + 
+					articles[i].getuserID() + "','" + 
+					articles[i].getname() + "',\"" +
+					articles[i].getdescription() + "\",'" +
+					articles[i].getdate() + "'," +
+					articles[i].getrating() + ")";
+			
+			try {
+				
+				Statement st = this.con.createStatement();
+				result = st.executeUpdate(query);
+				System.out.println(result);
+				num++;
+				//Close
+				st.close();
+				
+			} catch (SQLException e) {
+				e.printStackTrace();
+			}
+		}
+		return num;
+	
+	}
+
+	@Override
+	public int insertComment(Comment[] comments) {
+		
+		int result = 0;
+		int num=0;
+		for(int i=0;i<comments.length;i++)
+		{
+			//comment(commentID:char(10), articleID:char(10), userID:char(10), message:char(130), date:date, rating:int),
+			String query = "insert into Comment values ('" + 
+					comments[i].getcommentID()+ "','" + 
+					comments[i].getarticleID() + "','" + 
+					comments[i].getuserID() + "','" +
+					comments[i].getmessage() + "','" +
+					comments[i].getdate() + "','" +
+					comments[i].getrating() + "')";
+			
+			try {
+				
+				Statement st = this.con.createStatement();
+				result = st.executeUpdate(query);
+				System.out.println(result);
+				num++;
+				//Close
+				st.close();
+				
+			} catch (SQLException e) {
+				e.printStackTrace();
+			}
+		}
+		return num;
+	
+	}
+
+	@Override
+	public int insertReputation(Reputation[] reputations) {
+		
+		int result = 0;
+		int num=0;
+		for(int i=0;i<reputations.length;i++)
+		{
+			//reputation(reputationID:char(10), userID:char(10), weeklyReputation:int, monthlyReputation:int, yearlyReputation:int,
+					//alltimeReputation:int)
+			String query = "insert into Reputation values ('" + 
+					reputations[i].getreputationID()+ "','" + 
+					reputations[i].getuserID() + "','" + 
+					reputations[i].getweeklyReputation() + "','" + 
+					reputations[i].getmonthlyReputation() + "','" + 
+					reputations[i].getyearlyReputation() + "','" + 
+					reputations[i].getalltimeReputation() + "')";
+			
+			try {
+				
+				Statement st = this.con.createStatement();
+				result = st.executeUpdate(query);
+				System.out.println(result);
+				num++;
+				//Close
+				st.close();
+				
+			} catch (SQLException e) {
+				e.printStackTrace();
+			}
+		}
+		return num;
+	}
+
+	@Override
+	public UsernameDateRatingResult[] getArticleHighestRating() {
+
+		ResultSet rs;
+		List<UsernameDateRatingResult> arr = new ArrayList<UsernameDateRatingResult>();
+
+		try {
+			PreparedStatement q = con.prepareStatement(
+					"select distinct b.username,a.date,a.rating " +
+					"from article a, user b " +
+					"where b.userID = a.userID and  a.rating = (select max(a2.rating) from article a2 ) " +
+					"order by b.username;");
+			rs=q.executeQuery();
+			
+			while(rs.next()){
+				String adimiz = rs.getString("username");
+				String dateimiz = rs.getString("date");
+				int rateimiz = rs.getInt("rating");
+				
+				System.out.println("getArticleHighestRating: "+adimiz+" "+dateimiz+" "+rateimiz);
+				
+				arr.add(new UsernameDateRatingResult(adimiz, dateimiz, rateimiz));
+			}
+			q.close();
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+		return (UsernameDateRatingResult[]) arr.toArray(new UsernameDateRatingResult[arr.size()]);
+		
+	}
+
+
+	@Override
+	public UsernameMessageRatingAlltimereputationResult[] getCommentLowestRating() {
+
+		ResultSet rs;
+		List<UsernameMessageRatingAlltimereputationResult> arr = new ArrayList<UsernameMessageRatingAlltimereputationResult>();
+
+		try {
+			PreparedStatement q = con.prepareStatement(
+					"select distinct u.username, c.message,c.rating, r.alltimeReputation from user u, comment c, " +
+		"reputation r where u.userID=r.userID and r.userID=c.userID and c.message not like '%mysql%' "+
+		 "and c.rating = (select min(rating)from comment) order by u.username; ");
+			rs=q.executeQuery();
+			
+			while(rs.next()){
+				String adimiz = rs.getString("username");
+				String mesajimiz = rs.getString("message");
+				int rateimiz = rs.getInt("rating");
+				int reputationimiz = rs.getInt("alltimeReputation");
+				
+				System.out.println("getCommentLowestRating: "+adimiz+" "+mesajimiz+" "+rateimiz+" "+reputationimiz);
+				
+				arr.add(new UsernameMessageRatingAlltimereputationResult(adimiz, mesajimiz, rateimiz, reputationimiz));
+			}
+			q.close();
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+		return (UsernameMessageRatingAlltimereputationResult[]) arr.toArray(new UsernameMessageRatingAlltimereputationResult[arr.size()]);
+	}
+
+	@Override
+	public UseridUsernameRegistrationdateWeeklyreputationResult[] getUseridUsernameAfterGivenDate(
+			String Date) {
+
+		ResultSet rs;
+		List<UseridUsernameRegistrationdateWeeklyreputationResult> arr = new ArrayList<UseridUsernameRegistrationdateWeeklyreputationResult>();
+
+		try {
+			PreparedStatement q = con.prepareStatement(
+					"select distinct u.userID,u.username,u.registrationDate,r.weeklyReputation " +
+					"from user u, reputation r " +
+					"where u.registrationDate>'"+Date+"' and u.userID = r.userID " +
+					"order by u.userID;");
+			rs=q.executeQuery();
+			
+			while(rs.next()){
+				String idmiz = rs.getString("userID");
+				String adimiz = rs.getString("username");
+				String dateimiz = rs.getString("registrationDate");
+				int reputationumuz = rs.getInt("weeklyReputation");
+				
+				System.out.println("getUseridUsernameAfterGivenDate: "+idmiz+" "+adimiz+" "+dateimiz+" "+reputationumuz);
+				
+				arr.add(new UseridUsernameRegistrationdateWeeklyreputationResult(idmiz,adimiz, dateimiz, reputationumuz));
+			}
+			q.close();
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+		return (UseridUsernameRegistrationdateWeeklyreputationResult[]) arr.toArray(new UseridUsernameRegistrationdateWeeklyreputationResult[arr.size()]);
+		
+	}
+
+	@Override
+	public UsernameMessageRatingResult[] getUsernameMessageRatingMoreThanGivenRating(
+			String message, int rating) {
+		ResultSet rs;
+		List<UsernameMessageRatingResult> arr = new ArrayList<UsernameMessageRatingResult>();
+
+		try {
+			PreparedStatement q = con.prepareStatement(
+					"select distinct u.username,c.message,c.rating " +
+					"from user u, comment c " +
+					"where c.message not like \"%" + message +"%\"   and c.rating > ? and  u.userID = c.userID " +
+					"order by u.username;");
+			q.setString(1, message);
+			q.setInt(1, rating);
+			
+			rs=q.executeQuery();
+			
+			while(rs.next()){
+				String adimiz = rs.getString("username");
+				String mesajimiz = rs.getString("message");
+				int rateimiz = rs.getInt("rating");
+				
+				System.out.println("getUsernameMessageRatingMoreThanGivenRating: "+adimiz+" "+mesajimiz+" "+rateimiz);
+				
+				arr.add(new UsernameMessageRatingResult(adimiz, mesajimiz, rateimiz));
+			}
+			q.close();
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+		return (UsernameMessageRatingResult[]) arr.toArray(new UsernameMessageRatingResult[arr.size()]);
+		
+	}
+
+	@Override
+	public int MultiplyComment(String date) {
+		ResultSet rs;
+		String q = "update comment c set c.rating = c.rating*2 where c.date>'"+date+"' ;";
+		int r = 0;
+		try {
+			
+			Statement s = this.con.createStatement();
+			r = s.executeUpdate(q);
+			//System.out.println(r + " changed the date.");
+			
+			s.close();
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+		return r;
+
+	}
+
+	@Override
+	public UseridUsernameLastlogindateResult[] getUsernameMessageRatingCommentedByGivenUser(
+			String userID) {
+	ResultSet rs;
+	List<UseridUsernameLastlogindateResult> arr = new ArrayList<UseridUsernameLastlogindateResult>();
+
+	try {
+		PreparedStatement q = con.prepareStatement(
+				"select distinct u.userID,u.username, u.lastLoginDate from user u,comment c1 where u.userID  <> '"+userID+"' and c1.userID = u.userID and not exists (select comment.articleID from comment where comment.userID =  '"+userID+"' and comment.articleID  not in (select comment.articleID from comment where u.userID = comment.userID ) ) order by u.userID  ;");
+		rs=q.executeQuery();
+		
+		while(rs.next()){
+			String idimiz = rs.getString("userID");
+			String adimiz = rs.getString("username");
+			String logindateimiz = rs.getString("lastLoginDate");
+			
+			System.out.println("getUsernameMessageRatingCommentedByGivenUser: "+idimiz+" "+adimiz+" "+logindateimiz);
+			
+			arr.add(new UseridUsernameLastlogindateResult(idimiz, adimiz, logindateimiz));
+		}
+		q.close();
+	} catch (SQLException e) {
+		e.printStackTrace();
+	}
+	return (UseridUsernameLastlogindateResult[]) arr.toArray(new UseridUsernameLastlogindateResult[arr.size()]);
+	
+	
+	}
+
+	@Override
+	public UsernameMessageRatingResult[] getNameUsernameDateRatingMoreThanGivenArticle(
+			int rating, String articleID) {
+		ResultSet rs;
+		List<UsernameMessageRatingResult> arr = new ArrayList<UsernameMessageRatingResult>();
+
+		try {
+			PreparedStatement q = con.prepareStatement(
+					"select distinct u.username, c.message,c.rating from user u,comment c,article a where u.userID=c.userID and c.rating > ? and a.articleID = c.articleID and c.articleID = '"+articleID+"' order by u.username;");	
+					q.setInt(1, rating);
+					rs=q.executeQuery();
+			
+			while(rs.next()){
+				String adimiz = rs.getString("username");
+				String mesajimiz = rs.getString("message");
+				int ratingimiz = rs.getInt("rating");
+				
+				System.out.println("getNameUsernameDateRatingMoreThanGivenArticle: "+adimiz+" "+mesajimiz+" "+ratingimiz);
+				
+				arr.add(new UsernameMessageRatingResult(adimiz, mesajimiz, ratingimiz));
+			}
+			q.close();
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+		return (UsernameMessageRatingResult[]) arr.toArray(new UsernameMessageRatingResult[arr.size()]);
+		
+	}
+
+	@Override
+	public NameUsernameDateRatingResult[] getUsernameDateRatingNotCommentedByAnyUser() {
+		ResultSet rs;
+		List<NameUsernameDateRatingResult> arr = new ArrayList<NameUsernameDateRatingResult>();
+
+		try {
+			PreparedStatement q = con.prepareStatement(
+					"select distinct a.name,u.username,a.date,a.rating from Article a, comment c,user u where c.userID=u.userID and  a.articleID=c.articleID group by a.articleID having count(commentID) = 1 order by a.name ;");
+			rs=q.executeQuery();
+			
+			while(rs.next()){
+				String articleadi = rs.getString("name");
+				String adimiz = rs.getString("username");
+				String dateimiz = rs.getString("date");
+				int ratingimiz = rs.getInt("rating");
+				
+				System.out.println("getUsernameDateRatingNotCommentedByAnyUser: "+articleadi+" "+adimiz+" "+dateimiz+" "+ratingimiz);
+				
+				arr.add(new NameUsernameDateRatingResult(articleadi, adimiz, dateimiz, ratingimiz));
+			}
+			q.close();
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+		return (NameUsernameDateRatingResult[]) arr.toArray(new NameUsernameDateRatingResult[arr.size()]);
+		
+
+	}
+
+	@Override
+	public UsernameDateRatingResult[] UsernameDateRatingHasHighestReputation(
+			String date) {
+		ResultSet rs;
+		List<UsernameDateRatingResult> arr = new ArrayList<UsernameDateRatingResult>();
+
+		try {
+			PreparedStatement q = con.prepareStatement(
+					"select distinct u.username,a.date,a.rating from user u,article a where u.userID=a.userID  and a.date< '"+date+"'  and a.userID in (select u.userID from user u,reputation r where r.userID=u.userID and r.weeklyReputation=(select max(weeklyReputation) from reputation group by r.weeklyReputation)) order by u.username;");
+			rs=q.executeQuery();
+			
+			while(rs.next()){
+				String adimiz = rs.getString("username");
+				String dateimiz = rs.getString("date");
+				int ratingimiz = rs.getInt("rating");				
+				
+				System.out.println("UsernameDateRatingHasHighestReputation:  "+adimiz+" "+dateimiz+" "+ratingimiz);
+				
+				arr.add(new UsernameDateRatingResult(adimiz, dateimiz, ratingimiz));
+			}
+			q.close();
+		} catch (SQLException e) {
+			e.printStackTrace();
+		}
+		return (UsernameDateRatingResult[]) arr.toArray(new UsernameDateRatingResult[arr.size()]);
+			
+	}
+
+	@Override
+	public UsernameDateRatingResult[] UsernameDateRatingDeleteAndSelect(
+			String date) {
+		ResultSet rs;
+		List<UsernameDateRatingResult> arr = new ArrayList<UsernameDateRatingResult>();
+		try {
+			PreparedStatement q = con.prepareStatement(
+					"delete from article where article.date>'"+date+"';");
+			q.executeUpdate();
+
+	
+
+			PreparedStatement r = con.prepareStatement(
+					"select distinct u.username,a.date,a.rating from user u,article a where u.userID=a.userID order by u.username ;");
+			rs=r.executeQuery();
+			
+			while(rs.next()){
+				String adimiz = rs.getString("username");
+				String dateimiz = rs.getString("date");
+				int ratingimiz = rs.getInt("rating");				
+				
+				System.out.println("UsernameDateRatingDeleteAndSelect:  "+adimiz+" "+dateimiz+" "+ratingimiz);
+				
+				arr.add(new UsernameDateRatingResult(adimiz, dateimiz, ratingimiz));
+
+		} } catch (SQLException e) {
+			e.printStackTrace();
+		}
+		return (UsernameDateRatingResult[]) arr.toArray(new UsernameDateRatingResult[arr.size()]);
+		
+	
+
+}
+}
+
